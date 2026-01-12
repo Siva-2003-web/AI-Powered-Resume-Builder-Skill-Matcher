@@ -1,8 +1,8 @@
 import axios from "axios";
-import { VITE_APP_URL } from "@/config/config";
+import { VITE_API_URL } from "@/config/config";
 
 const axiosInstance = axios.create({
-  baseURL: VITE_APP_URL + "api/",
+  baseURL: VITE_API_URL + "/api/",
   headers: {
     "Content-Type": "application/json",
   },
