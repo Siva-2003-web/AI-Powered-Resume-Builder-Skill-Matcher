@@ -21,10 +21,5 @@
         }
       ]
     }
-  ],
-  "env": {
-    "VITE_API_URL": "@vite_api_url",
-    "VITE_APP_NAME": "AI Resume Builder",
-    "VITE_ENV": "production"
-  }
+  ]
 }
