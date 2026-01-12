@@ -26,6 +26,7 @@ import { resumeStore } from "./store/store";
 import { Provider } from "react-redux";
 import SkillGapAnalysis from "./pages/dashboard/skill-gap/SkillGapAnalysis.jsx";
 import JobMatcher from "./pages/dashboard/job-matcher/JobMatcher.jsx";
+import ResumeAnalysis from "./pages/dashboard/resume-analysis/ResumeAnalysis.jsx";
 import DemoPage from "./pages/demo/DemoPage.jsx";
 
 /**
@@ -61,6 +62,10 @@ const appRouter = createBrowserRouter([
       {
         path: "/dashboard/job-matcher",
         element: <JobMatcher />,
+      },
+      {
+        path: "/dashboard/resume-analysis",
+        element: <ResumeAnalysis />,
       },
     ],
   },

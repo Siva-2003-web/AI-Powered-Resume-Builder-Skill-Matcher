@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
 import { AIChatSession } from "@/Services/AiModel";
 import { toast } from "sonner";
-import { LoaderCircle, Sparkles, CheckCircle2, XCircle, ArrowLeft } from "lucide-react";
-import { useSelector } from "react-redux";
+import { LoaderCircle, Sparkles, CheckCircle2, XCircle, ArrowLeft, Upload, FileText } from "lucide-react";
 import { getAllResumeData, getDemoResumes } from "@/Services/resumeAPI";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { VITE_API_URL } from "@/config/config";
 
 const SKILL_GAP_PROMPT = `You are a career advisor AI. Analyze how well the candidate's skills match the job requirements.
 
@@ -31,6 +31,17 @@ Analyze carefully and respond ONLY with a JSON object in this exact format:
 
 Be thorough in your analysis. Match percentage should reflect how well the candidate's skills cover what's needed for the job.`;
 
+// Prompt for uploaded resume - extracts skills from resume text
+const SKILL_EXTRACTION_PROMPT = `You are a resume parser. Extract all skills from the following resume text.
+Resume Text:
+{resumeText}
+
+Respond ONLY with a JSON object in this format:
+{
+  "skills": ["skill1", "skill2", "skill3"]
+}
+Include technical skills, soft skills, tools, technologies, and frameworks mentioned.`;
+
 function SkillGapAnalysis() {
   const navigate = useNavigate();
   const [jobDescription, setJobDescription] = useState("");
@@ -40,12 +51,16 @@ function SkillGapAnalysis() {
   const [analysisResult, setAnalysisResult] = useState(null);
   const [selectedResumeId, setSelectedResumeId] = useState("");
   const [resumeList, setResumeList] = useState([]);
+  
+  // File upload states
+  const [resumeSource, setResumeSource] = useState("saved"); // "saved" or "upload"
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [extractingSkills, setExtractingSkills] = useState(false);
 
   // Fetch user's resumes on mount
   useEffect(() => {
     const fetchResumes = async () => {
       try {
-        // Fetch both user resumes and demo resumes
         const [userResponse, demoResponse] = await Promise.all([
           getAllResumeData(),
           getDemoResumes()
@@ -53,8 +68,6 @@ function SkillGapAnalysis() {
         
         const userResumes = userResponse.data || [];
         const demoResumes = demoResponse.data || [];
-        
-        // Combine resumes with demo resumes at the end
         const allResumes = [...userResumes, ...demoResumes];
         setResumeList(allResumes);
         
@@ -83,6 +96,71 @@ function SkillGapAnalysis() {
     setAnalysisResult(null);
   };
 
+  // Handle file upload
+  const handleFileChange = async (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const validTypes = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ];
+      
+      if (!validTypes.includes(file.type)) {
+        toast.error("Please upload a PDF or DOCX file.");
+        return;
+      }
+      
+      setUploadedFile(file);
+      setUserSkills([]);
+      setAnalysisResult(null);
+      
+      // Extract skills from uploaded file
+      await extractSkillsFromFile(file);
+    }
+  };
+
+  const extractSkillsFromFile = async (file) => {
+    setExtractingSkills(true);
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+      
+      let apiUrl = VITE_API_URL || "http://localhost:5001";
+      if (apiUrl.endsWith('/')) {
+        apiUrl = apiUrl.slice(0, -1);
+      }
+      
+      const uploadRes = await axios.post(`${apiUrl}/api/analysis/extract-text`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      
+      const text = uploadRes.data.text;
+      
+      if (!text || text.length < 50) {
+        throw new Error("Could not extract enough text from the resume.");
+      }
+      
+      // Use AI to extract skills
+      const prompt = SKILL_EXTRACTION_PROMPT.replace("{resumeText}", text);
+      const result = await AIChatSession.sendMessage(prompt);
+      const responseText = result.response.text();
+      const cleanedText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+      const parsed = JSON.parse(cleanedText);
+      
+      // Convert to expected format
+      const extractedSkills = (parsed.skills || []).map(skill => ({ name: skill }));
+      setUserSkills(extractedSkills);
+      toast.success(`Extracted ${extractedSkills.length} skills from resume!`);
+      
+    } catch (error) {
+      console.error("Error extracting skills:", error);
+      const errorMessage = error.response?.data?.message || error.message;
+      toast.error("Error extracting skills: " + errorMessage);
+    } finally {
+      setExtractingSkills(false);
+    }
+  };
+
   const analyzeSkillGap = async () => {
     if (!jobDescription.trim()) {
       toast("Please enter a job description");
@@ -90,7 +168,7 @@ function SkillGapAnalysis() {
     }
 
     if (!userSkills || userSkills.length === 0) {
-      toast("No skills found in selected resume. Please add skills first.");
+      toast("No skills found. Please select a resume or upload one.");
       return;
     }
 
@@ -107,16 +185,13 @@ function SkillGapAnalysis() {
       const responseText = result.response.text();
       console.log("Skill Gap Analysis Response:", responseText);
 
-      const parsed = JSON.parse(responseText);
+      const cleanedText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+      const parsed = JSON.parse(cleanedText);
       setAnalysisResult(parsed);
       toast("Analysis complete!");
     } catch (error) {
       console.error("Error analyzing skills:", error);
-      if (error.message.includes("404") || error.message.includes("not found")) {
-        toast.error("API Key Error: Model not enabled. Please check your Google Cloud Console.");
-      } else {
-        toast.error("Error analyzing skills: " + error.message);
-      }
+      toast.error("Error analyzing skills: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -140,33 +215,97 @@ function SkillGapAnalysis() {
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Left Column - Input */}
         <div className="space-y-6">
-          {/* Resume Selector */}
+          {/* Resume Source Toggle */}
           <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4">
-            <h3 className="font-bold text-lg mb-3">1. Select Your Resume</h3>
-            {fetchingSkills ? (
-              <div className="flex items-center gap-2 text-gray-500">
-                <LoaderCircle className="animate-spin h-4 w-4" />
-                Loading resumes...
-              </div>
-            ) : (
-              <select
-                className="w-full p-2 border rounded-lg"
-                value={selectedResumeId}
-                onChange={handleResumeChange}
+            <h3 className="font-bold text-lg mb-3">1. Choose Resume Source</h3>
+            <div className="flex gap-2 mb-4">
+              <Button 
+                variant={resumeSource === "saved" ? "default" : "outline"}
+                onClick={() => {
+                  setResumeSource("saved");
+                  setUploadedFile(null);
+                  if (resumeList.length > 0) {
+                    setUserSkills(resumeList.find(r => r._id === selectedResumeId)?.skills || []);
+                  }
+                }}
+                className="flex-1"
               >
-                {resumeList.map((resume) => (
-                  <option key={resume._id} value={resume._id}>
-                    {resume.isDemo ? "🌟 DEMO: " : ""}{resume.title || resume.firstName + "'s Resume"}
-                  </option>
-                ))}
-              </select>
+                Saved Resumes
+              </Button>
+              <Button 
+                variant={resumeSource === "upload" ? "default" : "outline"}
+                onClick={() => {
+                  setResumeSource("upload");
+                  setUserSkills([]);
+                }}
+                className="flex-1"
+              >
+                <Upload className="h-4 w-4 mr-2" /> Upload File
+              </Button>
+            </div>
+
+            {/* Saved Resume Selector */}
+            {resumeSource === "saved" && (
+              <>
+                {fetchingSkills ? (
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <LoaderCircle className="animate-spin h-4 w-4" />
+                    Loading resumes...
+                  </div>
+                ) : (
+                  <select
+                    className="w-full p-2 border rounded-lg"
+                    value={selectedResumeId}
+                    onChange={handleResumeChange}
+                  >
+                    {resumeList.map((resume) => (
+                      <option key={resume._id} value={resume._id}>
+                        {resume.isDemo ? "🌟 DEMO: " : ""}{resume.title || resume.firstName + "'s Resume"}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </>
+            )}
+
+            {/* File Upload */}
+            {resumeSource === "upload" && (
+              <div 
+                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer"
+                onClick={() => document.getElementById('resume-upload-skill').click()}
+              >
+                <input 
+                  type="file" 
+                  id="resume-upload-skill" 
+                  className="hidden" 
+                  accept=".pdf,.docx"
+                  onChange={handleFileChange}
+                />
+                {extractingSkills ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <LoaderCircle className="animate-spin h-8 w-8 text-primary" />
+                    <p className="text-gray-500">Extracting skills from resume...</p>
+                  </div>
+                ) : uploadedFile ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <FileText className="h-5 w-5 text-green-600" />
+                    <span className="font-medium">{uploadedFile.name}</span>
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Click to upload PDF or DOCX</p>
+                  </>
+                )}
+              </div>
             )}
 
             {/* Display current skills */}
             {userSkills && userSkills.length > 0 && (
               <div className="mt-4">
-                <p className="text-sm text-gray-500 mb-2">Your current skills:</p>
-                <div className="flex flex-wrap gap-2">
+                <p className="text-sm text-gray-500 mb-2">Skills detected ({userSkills.length}):</p>
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
                   {userSkills.map((skill, index) => (
                     <span
                       key={index}
@@ -196,7 +335,7 @@ function SkillGapAnalysis() {
             className="w-full"
             size="lg"
             onClick={analyzeSkillGap}
-            disabled={loading}
+            disabled={loading || extractingSkills}
           >
             {loading ? (
               <>
@@ -217,7 +356,7 @@ function SkillGapAnalysis() {
           {!analysisResult && !loading && (
             <div className="h-full flex items-center justify-center border-2 border-dashed rounded-lg p-10">
               <p className="text-gray-400 text-center">
-                Your analysis results will appear here after you click "Analyze Skill Gap"
+                Your analysis results will appear here after you click &quot;Analyze Skill Gap&quot;
               </p>
             </div>
           )}

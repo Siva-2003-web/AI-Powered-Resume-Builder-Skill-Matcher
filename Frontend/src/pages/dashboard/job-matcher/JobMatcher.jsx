@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AIChatSession } from "@/Services/AiModel";
 import { toast } from "sonner";
-import { LoaderCircle, Sparkles, ArrowLeft, TrendingUp, BookOpen, Briefcase, GraduationCap } from "lucide-react";
+import { LoaderCircle, Sparkles, ArrowLeft, TrendingUp, BookOpen, Briefcase, GraduationCap, Upload, FileText, CheckCircle2 } from "lucide-react";
 import { getAllResumeData, getDemoResumes } from "@/Services/resumeAPI";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { VITE_API_URL } from "@/config/config";
 
 const JOB_MATCH_PROMPT = `You are an expert HR recruiter and career advisor. Analyze how well this resume matches the job description.
 
@@ -54,6 +56,48 @@ Provide a comprehensive analysis and respond ONLY with a JSON object in this exa
 
 Be honest and constructive in your feedback. Scores should be between 0-100.`;
 
+// Prompt for analyzing uploaded resume text against job description
+const UPLOADED_RESUME_PROMPT = `You are an expert HR recruiter and career advisor. Analyze how well this resume matches the job description.
+
+**Resume Text:**
+{resumeText}
+
+**Job Description:**
+{jobDescription}
+
+Provide a comprehensive analysis and respond ONLY with a JSON object in this exact format:
+{
+  "overallScore": 72,
+  "breakdown": {
+    "skills": { 
+      "score": 65, 
+      "feedback": "Specific feedback about skills match",
+      "strengths": ["strength1", "strength2"],
+      "gaps": ["gap1", "gap2"]
+    },
+    "experience": { 
+      "score": 80, 
+      "feedback": "Specific feedback about experience relevance",
+      "strengths": ["strength1"],
+      "gaps": ["gap1"]
+    },
+    "education": { 
+      "score": 70, 
+      "feedback": "Specific feedback about education fit",
+      "strengths": ["strength1"],
+      "gaps": []
+    }
+  },
+  "improvements": [
+    "Actionable improvement suggestion 1",
+    "Actionable improvement suggestion 2",
+    "Actionable improvement suggestion 3"
+  ],
+  "summary": "2-3 sentence overall assessment of the candidate's fit for this role"
+}
+
+Be honest and constructive in your feedback. Scores should be between 0-100.`;
+
 function JobMatcher() {
   const navigate = useNavigate();
   const [jobDescription, setJobDescription] = useState("");
@@ -64,11 +108,16 @@ function JobMatcher() {
   const [selectedResume, setSelectedResume] = useState(null);
   const [resumeList, setResumeList] = useState([]);
 
+  // File upload states
+  const [resumeSource, setResumeSource] = useState("saved"); // "saved" or "upload"
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [uploadedResumeText, setUploadedResumeText] = useState("");
+  const [extractingText, setExtractingText] = useState(false);
+
   // Fetch user's resumes and demo resumes on mount
   useEffect(() => {
     const fetchResumes = async () => {
       try {
-        // Fetch both user resumes and demo resumes
         const [userResponse, demoResponse] = await Promise.all([
           getAllResumeData(),
           getDemoResumes()
@@ -76,8 +125,6 @@ function JobMatcher() {
         
         const userResumes = userResponse.data || [];
         const demoResumes = demoResponse.data || [];
-        
-        // Combine resumes with demo resumes at the end
         const allResumes = [...userResumes, ...demoResumes];
         setResumeList(allResumes);
         
@@ -102,6 +149,61 @@ function JobMatcher() {
     const resume = resumeList.find((r) => r._id === resumeId);
     setSelectedResume(resume);
     setAnalysisResult(null);
+  };
+
+  // Handle file upload
+  const handleFileChange = async (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const validTypes = [
+        "application/pdf",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ];
+      
+      if (!validTypes.includes(file.type)) {
+        toast.error("Please upload a PDF or DOCX file.");
+        return;
+      }
+      
+      setUploadedFile(file);
+      setUploadedResumeText("");
+      setAnalysisResult(null);
+      
+      // Extract text from uploaded file
+      await extractTextFromFile(file);
+    }
+  };
+
+  const extractTextFromFile = async (file) => {
+    setExtractingText(true);
+    try {
+      const formData = new FormData();
+      formData.append("resume", file);
+      
+      let apiUrl = VITE_API_URL || "http://localhost:5001";
+      if (apiUrl.endsWith('/')) {
+        apiUrl = apiUrl.slice(0, -1);
+      }
+      
+      const uploadRes = await axios.post(`${apiUrl}/api/analysis/extract-text`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      
+      const text = uploadRes.data.text;
+      
+      if (!text || text.length < 50) {
+        throw new Error("Could not extract enough text from the resume.");
+      }
+      
+      setUploadedResumeText(text);
+      toast.success("Resume text extracted successfully!");
+      
+    } catch (error) {
+      console.error("Error extracting text:", error);
+      toast.error("Error extracting text: " + error.message);
+    } finally {
+      setExtractingText(false);
+    }
   };
 
   const formatExperience = (experience) => {
@@ -131,39 +233,51 @@ function JobMatcher() {
       return;
     }
 
-    if (!selectedResume) {
+    if (resumeSource === "saved" && !selectedResume) {
       toast("Please select a resume to analyze");
+      return;
+    }
+
+    if (resumeSource === "upload" && !uploadedResumeText) {
+      toast("Please upload a resume first");
       return;
     }
 
     setLoading(true);
     setAnalysisResult(null);
 
-    const prompt = JOB_MATCH_PROMPT
-      .replace("{name}", `${selectedResume.firstName || ''} ${selectedResume.lastName || ''}`)
-      .replace("{jobTitle}", selectedResume.jobTitle || "Not specified")
-      .replace("{summary}", selectedResume.summary || "No summary")
-      .replace("{skills}", selectedResume.skills?.map(s => s.name).join(", ") || "No skills listed")
-      .replace("{experience}", formatExperience(selectedResume.experience))
-      .replace("{education}", formatEducation(selectedResume.education))
-      .replace("{projects}", formatProjects(selectedResume.projects))
-      .replace("{jobDescription}", jobDescription);
+    let prompt;
+    
+    if (resumeSource === "upload") {
+      // Use uploaded resume text
+      prompt = UPLOADED_RESUME_PROMPT
+        .replace("{resumeText}", uploadedResumeText)
+        .replace("{jobDescription}", jobDescription);
+    } else {
+      // Use saved resume data
+      prompt = JOB_MATCH_PROMPT
+        .replace("{name}", `${selectedResume.firstName || ''} ${selectedResume.lastName || ''}`)
+        .replace("{jobTitle}", selectedResume.jobTitle || "Not specified")
+        .replace("{summary}", selectedResume.summary || "No summary")
+        .replace("{skills}", selectedResume.skills?.map(s => s.name).join(", ") || "No skills listed")
+        .replace("{experience}", formatExperience(selectedResume.experience))
+        .replace("{education}", formatEducation(selectedResume.education))
+        .replace("{projects}", formatProjects(selectedResume.projects))
+        .replace("{jobDescription}", jobDescription);
+    }
 
     try {
       const result = await AIChatSession.sendMessage(prompt);
       const responseText = result.response.text();
       console.log("Job Matcher Response:", responseText);
 
-      const parsed = JSON.parse(responseText);
+      const cleanedText = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+      const parsed = JSON.parse(cleanedText);
       setAnalysisResult(parsed);
       toast("Analysis complete!");
     } catch (error) {
       console.error("Error analyzing resume:", error);
-      if (error.message.includes("404") || error.message.includes("not found")) {
-        toast.error("API Key Error: Model not enabled. Please check Google AI Studio.");
-      } else {
-        toast.error("Error analyzing resume: " + error.message);
-      }
+      toast.error("Error analyzing resume: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -199,35 +313,104 @@ function JobMatcher() {
       <div className="grid lg:grid-cols-2 gap-8">
         {/* Left Column - Input */}
         <div className="space-y-6">
-          {/* Resume Selector */}
+          {/* Resume Source Toggle */}
           <div className="p-5 shadow-lg rounded-lg border-t-primary border-t-4">
-            <h3 className="font-bold text-lg mb-3">1. Select Your Resume</h3>
-            {fetchingResumes ? (
-              <div className="flex items-center gap-2 text-gray-500">
-                <LoaderCircle className="animate-spin h-4 w-4" />
-                Loading resumes...
-              </div>
-            ) : (
-              <select
-                className="w-full p-2 border rounded-lg"
-                value={selectedResumeId}
-                onChange={handleResumeChange}
+            <h3 className="font-bold text-lg mb-3">1. Choose Resume Source</h3>
+            <div className="flex gap-2 mb-4">
+              <Button 
+                variant={resumeSource === "saved" ? "default" : "outline"}
+                onClick={() => {
+                  setResumeSource("saved");
+                  setUploadedFile(null);
+                  setUploadedResumeText("");
+                }}
+                className="flex-1"
               >
-                {resumeList.map((resume) => (
-                  <option key={resume._id} value={resume._id}>
-                    {resume.isDemo ? "🌟 DEMO: " : ""}{resume.title || `${resume.firstName}'s Resume`} - {resume.jobTitle || "No title"}
-                  </option>
-                ))}
-              </select>
+                Saved Resumes
+              </Button>
+              <Button 
+                variant={resumeSource === "upload" ? "default" : "outline"}
+                onClick={() => {
+                  setResumeSource("upload");
+                  setSelectedResume(null);
+                }}
+                className="flex-1"
+              >
+                <Upload className="h-4 w-4 mr-2" /> Upload File
+              </Button>
+            </div>
+
+            {/* Saved Resume Selector */}
+            {resumeSource === "saved" && (
+              <>
+                {fetchingResumes ? (
+                  <div className="flex items-center gap-2 text-gray-500">
+                    <LoaderCircle className="animate-spin h-4 w-4" />
+                    Loading resumes...
+                  </div>
+                ) : (
+                  <select
+                    className="w-full p-2 border rounded-lg"
+                    value={selectedResumeId}
+                    onChange={handleResumeChange}
+                  >
+                    {resumeList.map((resume) => (
+                      <option key={resume._id} value={resume._id}>
+                        {resume.isDemo ? "🌟 DEMO: " : ""}{resume.title || `${resume.firstName}'s Resume`} - {resume.jobTitle || "No title"}
+                      </option>
+                    ))}
+                  </select>
+                )}
+
+                {/* Resume Preview */}
+                {selectedResume && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
+                    <p><strong>Name:</strong> {selectedResume.firstName} {selectedResume.lastName}</p>
+                    <p><strong>Target Role:</strong> {selectedResume.jobTitle || "Not specified"}</p>
+                    <p><strong>Skills:</strong> {selectedResume.skills?.length || 0} skills listed</p>
+                    <p><strong>Experience:</strong> {selectedResume.experience?.length || 0} positions</p>
+                  </div>
+                )}
+              </>
             )}
 
-            {/* Resume Preview */}
-            {selectedResume && (
-              <div className="mt-4 p-3 bg-gray-50 rounded-lg text-sm">
-                <p><strong>Name:</strong> {selectedResume.firstName} {selectedResume.lastName}</p>
-                <p><strong>Target Role:</strong> {selectedResume.jobTitle || "Not specified"}</p>
-                <p><strong>Skills:</strong> {selectedResume.skills?.length || 0} skills listed</p>
-                <p><strong>Experience:</strong> {selectedResume.experience?.length || 0} positions</p>
+            {/* File Upload */}
+            {resumeSource === "upload" && (
+              <div 
+                className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer"
+                onClick={() => document.getElementById('resume-upload-job').click()}
+              >
+                <input 
+                  type="file" 
+                  id="resume-upload-job" 
+                  className="hidden" 
+                  accept=".pdf,.docx"
+                  onChange={handleFileChange}
+                />
+                {extractingText ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <LoaderCircle className="animate-spin h-8 w-8 text-primary" />
+                    <p className="text-gray-500">Extracting resume content...</p>
+                  </div>
+                ) : uploadedFile ? (
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-green-600" />
+                      <span className="font-medium">{uploadedFile.name}</span>
+                      <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    </div>
+                    {uploadedResumeText && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        {uploadedResumeText.length} characters extracted
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <>
+                    <Upload className="h-10 w-10 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500">Click to upload PDF or DOCX</p>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -248,7 +431,7 @@ function JobMatcher() {
             className="w-full"
             size="lg"
             onClick={analyzeMatch}
-            disabled={loading}
+            disabled={loading || extractingText}
           >
             {loading ? (
               <>
