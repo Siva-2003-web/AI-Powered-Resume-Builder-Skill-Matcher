@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
-import { getAllResumeData } from "@/Services/resumeAPI";
+import { getAllResumeData, getDemoResumes } from "@/Services/resumeAPI";
 import AddResume from "./components/AddResume";
 import ResumeCard from "./components/ResumeCard";
 import { useNavigate } from "react-router-dom";
@@ -9,6 +9,7 @@ import { Target, Briefcase, Sparkles, ArrowRight } from "lucide-react";
 function Dashboard() {
   const user = useSelector((state) => state.editUser.userData);
   const [resumeList, setResumeList] = React.useState([]);
+  const [demoResumeList, setDemoResumeList] = React.useState([]);
   const navigate = useNavigate();
 
   const fetchAllResumeData = async () => {
@@ -24,8 +25,19 @@ function Dashboard() {
     }
   };
 
+  const fetchDemoResumes = async () => {
+    try {
+      const demos = await getDemoResumes();
+      console.log("Demo resumes fetched:", demos.data);
+      setDemoResumeList(demos.data);
+    } catch (error) {
+      console.log("Error fetching demo resumes:", error.message);
+    }
+  };
+
   useEffect(() => {
     fetchAllResumeData();
+    fetchDemoResumes();
   }, [user]);
 
   return (
@@ -153,6 +165,42 @@ function Dashboard() {
                 </div>
               ))}
           </div>
+
+          {/* Demo Resumes Section */}
+          {demoResumeList.length > 0 && (
+            <div className="mt-12">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex-1 h-px bg-border"></div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                  <Sparkles className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <span className="text-sm font-bold text-blue-700 dark:text-blue-300">
+                    Demo Resumes - Try Our Features
+                  </span>
+                </div>
+                <div className="flex-1 h-px bg-border"></div>
+              </div>
+              
+              <p className="text-center text-muted-foreground mb-6">
+                Use these professional demo resumes to test Job Matcher, Skill Gap Analysis, and other features
+              </p>
+
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {demoResumeList.map((resume, index) => (
+                  <div
+                    key={resume._id}
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${0.1 * (index + 1)}s` }}
+                  >
+                    <ResumeCard
+                      resume={resume}
+                      refreshData={fetchDemoResumes}
+                      isDemo={true}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

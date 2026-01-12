@@ -5,7 +5,7 @@ import { useDispatch } from "react-redux";
 import { logoutUser } from "@/Services/login";
 import { addUserData } from "@/features/user/userFeatures";
 import ThemeToggle from "./ThemeToggle";
-import { LogOut, LayoutDashboard, FileText } from "lucide-react";
+import { LogOut, LayoutDashboard, FileText, Eye } from "lucide-react";
 
 function Header({ user }) {
   const dispatch = useDispatch();
@@ -51,6 +51,16 @@ function Header({ user }) {
         <div className="flex items-center gap-3">
           {/* Theme Toggle */}
           <ThemeToggle />
+
+          {/* Demo Button - Always visible */}
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/demo")}
+            className="hidden sm:flex items-center gap-2 transition-all duration-300 hover:bg-primary/10 hover:text-primary"
+          >
+            <Eye className="h-4 w-4" />
+            <span className="hidden md:inline">Demo</span>
+          </Button>
 
           {user ? (
             <>

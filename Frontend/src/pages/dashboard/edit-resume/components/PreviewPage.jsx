@@ -3,12 +3,16 @@ import { useSelector } from "react-redux";
 import ClassicTemplate from "./templates/ClassicTemplate";
 import ModernTemplate from "./templates/ModernTemplate";
 import MinimalTemplate from "./templates/MinimalTemplate";
+import ExecutiveTemplate from "./templates/ExecutiveTemplate";
+import CreativeTemplate from "./templates/CreativeTemplate";
 
 // Template mapping
 const templates = {
   classic: ClassicTemplate,
   modern: ModernTemplate,
   minimal: MinimalTemplate,
+  executive: ExecutiveTemplate,
+  creative: CreativeTemplate,
 };
 
 function PreviewPage() {

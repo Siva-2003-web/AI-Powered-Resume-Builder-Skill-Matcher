@@ -4,7 +4,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AIChatSession } from "@/Services/AiModel";
 import { toast } from "sonner";
 import { LoaderCircle, Sparkles, ArrowLeft, TrendingUp, BookOpen, Briefcase, GraduationCap } from "lucide-react";
-import { getAllResumeData } from "@/Services/resumeAPI";
+import { getAllResumeData, getDemoResumes } from "@/Services/resumeAPI";
 import { useNavigate } from "react-router-dom";
 
 const JOB_MATCH_PROMPT = `You are an expert HR recruiter and career advisor. Analyze how well this resume matches the job description.
@@ -64,19 +64,30 @@ function JobMatcher() {
   const [selectedResume, setSelectedResume] = useState(null);
   const [resumeList, setResumeList] = useState([]);
 
-  // Fetch user's resumes on mount
+  // Fetch user's resumes and demo resumes on mount
   useEffect(() => {
     const fetchResumes = async () => {
       try {
-        const response = await getAllResumeData();
-        setResumeList(response.data || []);
-        if (response.data && response.data.length > 0) {
-          setSelectedResumeId(response.data[0]._id);
-          setSelectedResume(response.data[0]);
+        // Fetch both user resumes and demo resumes
+        const [userResponse, demoResponse] = await Promise.all([
+          getAllResumeData(),
+          getDemoResumes()
+        ]);
+        
+        const userResumes = userResponse.data || [];
+        const demoResumes = demoResponse.data || [];
+        
+        // Combine resumes with demo resumes at the end
+        const allResumes = [...userResumes, ...demoResumes];
+        setResumeList(allResumes);
+        
+        if (allResumes.length > 0) {
+          setSelectedResumeId(allResumes[0]._id);
+          setSelectedResume(allResumes[0]);
         }
       } catch (error) {
         console.error("Error fetching resumes:", error);
-        toast("Error fetching your resumes");
+        toast("Error fetching resumes");
       } finally {
         setFetchingResumes(false);
       }
@@ -194,7 +205,7 @@ function JobMatcher() {
             {fetchingResumes ? (
               <div className="flex items-center gap-2 text-gray-500">
                 <LoaderCircle className="animate-spin h-4 w-4" />
-                Loading your resumes...
+                Loading resumes...
               </div>
             ) : (
               <select
@@ -204,7 +215,7 @@ function JobMatcher() {
               >
                 {resumeList.map((resume) => (
                   <option key={resume._id} value={resume._id}>
-                    {resume.title || `${resume.firstName}'s Resume`} - {resume.jobTitle || "No title"}
+                    {resume.isDemo ? "🌟 DEMO: " : ""}{resume.title || `${resume.firstName}'s Resume`} - {resume.jobTitle || "No title"}
                   </option>
                 ))}
               </select>

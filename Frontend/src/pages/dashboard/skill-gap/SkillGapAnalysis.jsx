@@ -6,7 +6,7 @@ import { AIChatSession } from "@/Services/AiModel";
 import { toast } from "sonner";
 import { LoaderCircle, Sparkles, CheckCircle2, XCircle, ArrowLeft } from "lucide-react";
 import { useSelector } from "react-redux";
-import { getAllResumeData } from "@/Services/resumeAPI";
+import { getAllResumeData, getDemoResumes } from "@/Services/resumeAPI";
 import { useNavigate } from "react-router-dom";
 
 const SKILL_GAP_PROMPT = `You are a career advisor AI. Analyze how well the candidate's skills match the job requirements.
@@ -45,15 +45,26 @@ function SkillGapAnalysis() {
   useEffect(() => {
     const fetchResumes = async () => {
       try {
-        const response = await getAllResumeData();
-        setResumeList(response.data || []);
-        if (response.data && response.data.length > 0) {
-          setSelectedResumeId(response.data[0]._id);
-          setUserSkills(response.data[0].skills || []);
+        // Fetch both user resumes and demo resumes
+        const [userResponse, demoResponse] = await Promise.all([
+          getAllResumeData(),
+          getDemoResumes()
+        ]);
+        
+        const userResumes = userResponse.data || [];
+        const demoResumes = demoResponse.data || [];
+        
+        // Combine resumes with demo resumes at the end
+        const allResumes = [...userResumes, ...demoResumes];
+        setResumeList(allResumes);
+        
+        if (allResumes.length > 0) {
+          setSelectedResumeId(allResumes[0]._id);
+          setUserSkills(allResumes[0].skills || []);
         }
       } catch (error) {
         console.error("Error fetching resumes:", error);
-        toast("Error fetching your resumes");
+        toast("Error fetching resumes");
       } finally {
         setFetchingSkills(false);
       }
@@ -135,7 +146,7 @@ function SkillGapAnalysis() {
             {fetchingSkills ? (
               <div className="flex items-center gap-2 text-gray-500">
                 <LoaderCircle className="animate-spin h-4 w-4" />
-                Loading your resumes...
+                Loading resumes...
               </div>
             ) : (
               <select
@@ -145,7 +156,7 @@ function SkillGapAnalysis() {
               >
                 {resumeList.map((resume) => (
                   <option key={resume._id} value={resume._id}>
-                    {resume.title || resume.firstName + "'s Resume"}
+                    {resume.isDemo ? "🌟 DEMO: " : ""}{resume.title || resume.firstName + "'s Resume"}
                   </option>
                 ))}
               </select>

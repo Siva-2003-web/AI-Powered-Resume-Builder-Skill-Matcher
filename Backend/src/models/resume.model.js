@@ -41,6 +41,7 @@ const resumeSchema = new mongoose.Schema({
     },
   ],
   themeColor: { type: String, required: true },
+  templateId: { type: String, default: "modern-professional" }, // Template design identifier
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

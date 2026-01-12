@@ -1,7 +1,7 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { addResumeData } from "@/features/resume/resumeFeatures";
-import { Layout, LayoutList, Minimize2, Loader2 } from "lucide-react";
+import { Layout, LayoutList, Minimize2, Loader2, Briefcase, Palette } from "lucide-react";
 import { useParams } from "react-router-dom";
 import { updateThisResume } from "@/Services/resumeAPI";
 import { toast } from "sonner";
@@ -25,6 +25,18 @@ const templates = [
     name: "Minimal",
     description: "Clean and elegant",
     icon: Minimize2,
+  },
+  {
+    id: "executive",
+    name: "Executive",
+    description: "Professional and authoritative",
+    icon: Briefcase,
+  },
+  {
+    id: "creative",
+    name: "Creative",
+    description: "Bold and expressive design",
+    icon: Palette,
   },
 ];
 
@@ -79,7 +91,7 @@ function TemplateSelector() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {templates.map((template) => {
           const IconComponent = template.icon;
           const isSelected = selectedTemplate === template.id;

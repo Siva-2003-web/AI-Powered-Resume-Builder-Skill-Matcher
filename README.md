@@ -1,210 +1,328 @@
-# 🚀 AI Resume Builder
+# 🎯 AI-Powered Resume Builder & Skill Matcher
 
-<div align="center">
-  <img src="https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react" alt="React" />
-  <img src="https://img.shields.io/badge/Vite-5.3-646CFF?style=for-the-badge&logo=vite" alt="Vite" />
-  <img src="https://img.shields.io/badge/TailwindCSS-3.4-06B6D4?style=for-the-badge&logo=tailwindcss" alt="Tailwind" />
-  <img src="https://img.shields.io/badge/Node.js-20-339933?style=for-the-badge&logo=nodedotjs" alt="Node.js" />
-  <img src="https://img.shields.io/badge/MongoDB-7.0-47A248?style=for-the-badge&logo=mongodb" alt="MongoDB" />
-  <img src="https://img.shields.io/badge/Google%20Gemini-AI-4285F4?style=for-the-badge&logo=google" alt="Gemini AI" />
-</div>
+A modern, full-stack web application that helps users create professional resumes with AI-powered features including skill gap analysis and job matching.
 
-<br />
-
-> **An intelligent, AI-powered resume building platform that helps job seekers create professional, ATS-optimized resumes with smart content suggestions and skill gap analysis.**
+![Status](https://img.shields.io/badge/status-production-success)
+![License](https://img.shields.io/badge/license-MIT-blue)
 
 ---
 
-## ✨ Key Features
+## ✨ **Features**
 
-### 🤖 AI-Powered Content Generation
+### **Resume Builder**
 
-- **Smart Summary Generator** - Creates professional summaries based on your job title
-- **Experience Bullet Points** - AI-generated work experience descriptions
-- **Skill Suggestions** - Intelligent skill recommendations based on your profile
-- **Project Descriptions** - Auto-generate compelling project summaries
+- 📝 **5 Professional Templates** - Classic, Modern, Minimal, Executive, Creative
+- 🎨 **Customizable Themes** - Multiple color schemes
+- 📱 **Responsive Design** - Works on all devices
+- 💾 **Auto-save** - Never lose your work
+- 📥 **PDF Download** - Export professional PDFs
 
-### 📊 Career Analysis Tools
+### **AI-Powered Tools**
 
-- **Skill Gap Analysis** - Compare your skills against job requirements
-- **Job Role Matcher** - Get compatibility scores for job descriptions
-- **Improvement Recommendations** - Actionable suggestions to enhance your profile
+- 🤖 **Skill Gap Analysis** - Identify missing skills for target roles
+- 🎯 **Job Matcher** - Match your resume to job descriptions
+- 💡 **AI Suggestions** - Powered by Google Gemini AI
 
-### 🎨 Professional Templates
+### **Demo Resumes**
 
-- **Classic Template** - Traditional single-column layout
-- **Modern Template** - Two-column design with sidebar
-- **Minimal Template** - Clean, elegant typography-focused design
-
-### 📄 Export & Share
-
-- **PDF Download** - High-quality A4 PDF export
-- **Real-time Preview** - See changes instantly as you type
-- **Shareable Links** - Share your resume with recruiters
+- 🌟 **5 Sample Resumes** - See different template designs
+- 👀 **Read-only Examples** - Professional content to inspire
+- 🚀 **Quick Start** - Understand the platform instantly
 
 ---
 
-## 🛠️ Tech Stack
+## 🏗️ **Tech Stack**
 
-| Layer             | Technologies                                             |
-| ----------------- | -------------------------------------------------------- |
-| **Frontend**      | React 18, Vite, TailwindCSS, Redux Toolkit, React Router |
-| **Backend**       | Node.js, Express.js, JWT Authentication                  |
-| **Database**      | MongoDB with Mongoose ODM                                |
-| **AI/ML**         | Google Generative AI (Gemini 1.5 Flash)                  |
-| **PDF**           | jsPDF, html2canvas                                       |
-| **UI Components** | Radix UI, Lucide Icons, Sonner                           |
+### **Frontend**
+
+- ⚛️ React 18
+- ⚡ Vite
+- 🎨 Tailwind CSS
+- 🔄 Redux Toolkit
+- 🛣️ React Router
+- 📝 React Hook Form
+
+### **Backend**
+
+- 🟢 Node.js
+- 🚂 Express.js
+- 🗄️ MongoDB + Mongoose
+- 🔐 JWT Authentication
+- 🍪 Cookie Parser
+- 🤖 Google Gemini AI
+
+### **Deployment**
+
+- 🌐 **Frontend:** Vercel
+- 🚂 **Backend:** Railway
+- 🗄️ **Database:** MongoDB Atlas
 
 ---
 
-## 🚀 Getting Started
+## 📦 **Project Structure**
 
-### Prerequisites
+```
+AI-Powered-Resume-Builder/
+├── Frontend/                 # React + Vite frontend
+│   ├── src/
+│   │   ├── components/      # Reusable components
+│   │   ├── pages/           # Page components
+│   │   ├── features/        # Redux slices
+│   │   ├── Services/        # API services
+│   │   └── data/            # Static data (templates)
+│   ├── .env.example         # Environment variables template
+│   └── vercel.json          # Vercel configuration
+│
+├── Backend/                  # Express.js backend
+│   ├── src/
+│   │   ├── controller/      # Route controllers
+│   │   ├── models/          # Mongoose models
+│   │   ├── routes/          # API routes
+│   │   ├── middleware/      # Custom middleware
+│   │   ├── data/            # Demo data
+│   │   └── db/              # Database connection
+│   ├── .env.example         # Environment variables template
+│   └── railway.json         # Railway configuration
+│
+├── DEPLOYMENT_GUIDE.md      # Detailed deployment guide
+├── QUICK_DEPLOY.md          # Quick reference
+└── PRE_DEPLOYMENT_CHECKLIST.md
+```
 
-- Node.js 18+
-- MongoDB (local or Atlas)
-- Google Gemini API Key
+---
 
-### Installation
+## 🚀 **Quick Start (Local Development)**
 
-1. **Clone the repository**
+### **Prerequisites**
+
+- Node.js 18+ installed
+- MongoDB installed locally or MongoDB Atlas account
+- Gemini API key
+
+### **1. Clone Repository**
 
 ```bash
 git clone <your-repo-url>
-cd Ai-Resume-Builder-main
+cd AI-Powered-Resume-Builder
 ```
 
-2. **Setup Backend**
+### **2. Setup Backend**
 
 ```bash
 cd Backend
 npm install
-```
-
-Create `.env` file:
-
-```env
-MONGODB_URI=mongodb://localhost:27017/resume-builder
-PORT=5001
-JWT_SECRET_KEY=your-secret-key
-JWT_SECRET_EXPIRES_IN=7d
-NODE_ENV=development
-ALLOWED_SITE=http://localhost:5173
-```
-
-3. **Setup Frontend**
-
-```bash
-cd Frontend
-npm install
-```
-
-Create `.env.local` file:
-
-```env
-VITE_GEMENI_API_KEY=your-gemini-api-key
-VITE_APP_URL=http://localhost:5001
-```
-
-4. **Run the Application**
-
-Terminal 1 (Backend):
-
-```bash
-cd Backend
+cp .env.example .env
+# Edit .env with your credentials
 npm start
 ```
 
-Terminal 2 (Frontend):
+### **3. Setup Frontend**
 
 ```bash
 cd Frontend
+npm install
+cp .env.example .env
+# Edit .env with backend URL
 npm run dev
 ```
 
-5. **Open in Browser**
+### **4. Open Browser**
 
 ```
-http://localhost:5173
-```
-
----
-
-## 📁 Project Structure
-
-```
-Ai-Resume-Builder-main/
-├── Backend/
-│   ├── src/
-│   │   ├── controllers/    # Route handlers
-│   │   ├── models/         # MongoDB schemas
-│   │   ├── routes/         # API routes
-│   │   ├── middleware/     # Auth middleware
-│   │   └── index.js        # Entry point
-│   └── package.json
-│
-├── Frontend/
-│   ├── src/
-│   │   ├── components/     # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   ├── Services/       # API & AI services
-│   │   ├── features/       # Redux slices
-│   │   ├── store/          # Redux store
-│   │   └── main.jsx        # Entry point
-│   ├── index.html
-│   └── package.json
-│
-└── README.md
+Frontend: http://localhost:5173
+Backend: http://localhost:5001
 ```
 
 ---
 
-## 🎯 Core Workflows
+## 🌐 **Deployment**
 
-### Resume Creation Flow
+### **Quick Deploy (30 minutes)**
 
-1. User signs up / logs in
-2. Creates new resume with title
-3. Fills personal details, summary, experience, education, skills, projects
-4. AI assists with content generation at each step
-5. Selects preferred template
-6. Previews and downloads as PDF
+See detailed guides:
 
-### Skill Gap Analysis Flow
+- 📖 **Full Guide:** [DEPLOYMENT_GUIDE.md](./DEPLOYMENT_GUIDE.md)
+- ⚡ **Quick Reference:** [QUICK_DEPLOY.md](./QUICK_DEPLOY.md)
+- ✅ **Checklist:** [PRE_DEPLOYMENT_CHECKLIST.md](./PRE_DEPLOYMENT_CHECKLIST.md)
 
-1. User selects a resume
-2. Pastes target job description
-3. AI analyzes and compares skills
-4. Shows matching skills, missing skills, and match percentage
-5. Provides improvement recommendations
+### **Deployment Stack:**
 
----
+```
+MongoDB Atlas (Database) → Free 512MB
+Railway (Backend)        → $5 credit/month
+Vercel (Frontend)        → Free unlimited
+```
 
-## 🔐 API Endpoints
-
-| Method | Endpoint                    | Description       |
-| ------ | --------------------------- | ----------------- |
-| POST   | `/api/v1/user/register`     | User registration |
-| POST   | `/api/v1/user/login`        | User login        |
-| GET    | `/api/v1/user/start`        | Get current user  |
-| POST   | `/api/v1/user/logout`       | User logout       |
-| GET    | `/api/v1/resume/getAll`     | Get all resumes   |
-| POST   | `/api/v1/resume/create`     | Create resume     |
-| PUT    | `/api/v1/resume/update/:id` | Update resume     |
-| DELETE | `/api/v1/resume/delete/:id` | Delete resume     |
+**Total Cost:** $0/month (within free tiers)
 
 ---
 
-## 🎨 UI/UX Features
+## 🔐 **Environment Variables**
 
-- **Dark Mode** - Toggle between light and dark themes
-- **Responsive Design** - Works on desktop, tablet, and mobile
-- **Glassmorphism** - Modern frosted glass effects
-- **Smooth Animations** - Polished transitions and micro-interactions
-- **Toast Notifications** - Real-time feedback for user actions
+### **Backend (.env)**
+
+```env
+MONGODB_URI=mongodb+srv://...
+PORT=5001
+NODE_ENV=development
+JWT_SECRET=your-secret-key
+GEMINI_API_KEY=your-api-key
+CORS_ORIGINS=http://localhost:5173
+FRONTEND_URL=http://localhost:5173
+```
+
+### **Frontend (.env)**
+
+```env
+VITE_API_URL=http://localhost:5001
+VITE_APP_NAME=AI Resume Builder
+VITE_ENV=development
+```
 
 ---
 
-## 📝 License
+## 📚 **API Documentation**
 
-This project is licensed under the MIT License.
+### **Authentication**
+
+- `POST /api/users/register` - Register new user
+- `POST /api/users/login` - Login user
+- `POST /api/users/logout` - Logout user
+
+### **Resumes**
+
+- `GET /api/resumes` - Get all user resumes
+- `GET /api/resumes/:id` - Get single resume
+- `POST /api/resumes` - Create new resume
+- `PUT /api/resumes/:id` - Update resume
+- `DELETE /api/resumes/:id` - Delete resume
+- `GET /api/resumes/demo` - Get demo resumes (public)
+
+---
+
+## 🎨 **Resume Templates**
+
+1. **Classic** - Traditional single-column layout
+2. **Modern** - Two-column with sidebar
+3. **Minimal** - Clean and elegant design
+4. **Executive** - Bold, professional, uppercase headers
+5. **Creative** - Colorful header, timeline design
+
+Each template supports:
+
+- Custom theme colors
+- All resume sections
+- PDF export
+- Responsive design
+
+---
+
+## 🤖 **AI Features**
+
+### **Skill Gap Analysis**
+
+- Analyzes your resume against target job role
+- Identifies missing skills
+- Provides actionable recommendations
+- Powered by Google Gemini AI
+
+### **Job Matcher**
+
+- Compares resume to job description
+- Calculates match percentage
+- Highlights strengths and gaps
+- Suggests improvements
+
+---
+
+## 🧪 **Testing**
+
+### **Run Tests Locally**
+
+```bash
+# Frontend
+cd Frontend
+npm run build    # Test production build
+npm run preview  # Preview production build
+
+# Backend
+cd Backend
+npm start        # Test server
+```
+
+### **Test Checklist**
+
+- [ ] User registration/login
+- [ ] Resume CRUD operations
+- [ ] Template selection
+- [ ] PDF download
+- [ ] AI features
+- [ ] Demo resumes
+
+---
+
+## 📊 **Performance**
+
+- ⚡ **Fast Load Times** - Optimized builds
+- 🌍 **Global CDN** - Vercel edge network
+- 💾 **Efficient Caching** - Smart cache strategies
+- 📱 **Mobile Optimized** - Responsive design
+
+---
+
+## 🔒 **Security**
+
+- 🔐 JWT authentication
+- 🍪 HTTP-only cookies
+- 🛡️ CORS protection
+- 🔒 Environment variables
+- 🚫 Input validation
+- 🔑 Password hashing
+
+---
+
+## 🤝 **Contributing**
+
+Contributions are welcome! Please:
+
+1. Fork the repository
+2. Create feature branch
+3. Commit changes
+4. Push to branch
+5. Open pull request
+
+---
+
+## 📝 **License**
+
+MIT License - feel free to use for personal or commercial projects.
+
+---
+
+## 🆘 **Support**
+
+- 📖 **Documentation:** See deployment guides
+- 🐛 **Issues:** Open GitHub issue
+- 💬 **Questions:** Check documentation first
+
+---
+
+## 🎯 **Roadmap**
+
+- [ ] More resume templates
+- [ ] Cover letter generator
+- [ ] LinkedIn profile import
+- [ ] Resume analytics
+- [ ] Team collaboration
+- [ ] ATS optimization checker
+
+---
+
+## 👏 **Acknowledgments**
+
+- Google Gemini AI for AI features
+- Vercel for frontend hosting
+- Railway for backend hosting
+- MongoDB Atlas for database
+- Shadcn UI for components
+- Lucide for icons

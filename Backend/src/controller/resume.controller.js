@@ -1,6 +1,7 @@
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import Resume from "../models/resume.model.js";
+import demoResumes from "../data/demoResumes.js";
 
 const start = async (req, res) => {
   return res
@@ -9,7 +10,7 @@ const start = async (req, res) => {
 };
 
 const createResume = async (req, res) => {
-  const { title, themeColor } = req.body;
+  const { title, themeColor, templateId } = req.body;
 
   // Validate that the title and themeColor are provided
   if (!title || !themeColor) {
@@ -23,6 +24,7 @@ const createResume = async (req, res) => {
     const resume = await Resume.create({
       title,
       themeColor,
+      templateId: templateId || "modern-professional", // Default to modern-professional if not provided
       user: req.user._id, // Set the user ID from the authenticated user
       firstName: "",
       lastName: "",
@@ -103,6 +105,14 @@ const updateResume = async (req, res) => {
   console.log("Resume update request received:");
   const id = req.query.id;
 
+  // Check if this is a demo resume (IDs starting with "demo-")
+  if (id && id.startsWith("demo-")) {
+    console.log("Attempted to update demo resume - not allowed");
+    return res
+      .status(403)
+      .json(new ApiError(403, "Demo resumes cannot be modified. Please create your own resume or use 'Save As' to create a copy."));
+  }
+
   try {
     // Find and update the resume with the provided ID and user ID
     console.log("Database update request started");
@@ -139,6 +149,14 @@ const updateResume = async (req, res) => {
 const removeResume = async (req, res) => {
   const id = req.query.id;
 
+  // Check if this is a demo resume (IDs starting with "demo-")
+  if (id && id.startsWith("demo-")) {
+    console.log("Attempted to delete demo resume - not allowed");
+    return res
+      .status(403)
+      .json(new ApiError(403, "Demo resumes cannot be deleted. They are provided as examples only."));
+  }
+
   try {
     // Check if the resume exists and belongs to the current user
     const resume = await Resume.findOneAndDelete({
@@ -169,6 +187,29 @@ const removeResume = async (req, res) => {
   }
 };
 
+const getDemoResumes = async (req, res) => {
+  try {
+    // Return demo resumes with mock IDs
+    const demosWithIds = demoResumes.map((resume, index) => ({
+      ...resume,
+      _id: `demo-${index + 1}`,
+      user: "demo-user",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      isDemo: true // Flag to identify demo resumes
+    }));
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, demosWithIds, "Demo resumes fetched successfully"));
+  } catch (error) {
+    console.error("Error fetching demo resumes:", error);
+    return res
+      .status(500)
+      .json(new ApiError(500, "Internal Server Error", [], error.stack));
+  }
+};
+
 export {
   start,
   createResume,
@@ -176,4 +217,5 @@ export {
   getResume,
   updateResume,
   removeResume,
+  getDemoResumes,
 };

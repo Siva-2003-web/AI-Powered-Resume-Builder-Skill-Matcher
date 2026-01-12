@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Plus, Loader, FileText } from "lucide-react";
+import { Plus, Loader, FileText, Check } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { createNewResume } from "@/Services/resumeAPI";
 import { useNavigate } from "react-router-dom";
+import resumeTemplates from "@/data/resumeTemplates";
 
 function AddResume() {
   const [isDialogOpen, setOpenDialog] = useState(false);
   const [resumetitle, setResumetitle] = useState("");
+  const [selectedTemplate, setSelectedTemplate] = useState(resumeTemplates[0]);
   const [loading, setLoading] = useState(false);
   const Navigate = useNavigate();
 
@@ -25,10 +27,11 @@ function AddResume() {
     const data = {
       data: {
         title: resumetitle,
-        themeColor: "#3F5E96",
+        themeColor: selectedTemplate.themeColor,
+        templateId: selectedTemplate.id,
       },
     };
-    console.log(`Creating Resume ${resumetitle}`);
+    console.log(`Creating Resume ${resumetitle} with template ${selectedTemplate.name}`);
     createNewResume(data)
       .then((res) => {
         console.log("Printing From AddResume Response of Create Resume", res);
@@ -71,7 +74,7 @@ function AddResume() {
       </div>
 
       <Dialog open={isDialogOpen}>
-        <DialogContent setOpenDialog={setOpenDialog} className="sm:max-w-md">
+        <DialogContent setOpenDialog={setOpenDialog} className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-gradient-to-br from-primary to-blue-600 rounded-lg">
@@ -80,11 +83,13 @@ function AddResume() {
               <DialogTitle className="text-xl">Create New Resume</DialogTitle>
             </div>
             <DialogDescription className="text-base">
-              Give your resume a title to get started. You can change this later.
+              Choose a template and give your resume a title to get started.
             </DialogDescription>
           </DialogHeader>
           
+          {/* Resume Title Input */}
           <div className="mt-4">
+            <label className="text-sm font-medium mb-2 block">Resume Title</label>
             <Input
               className="h-12 text-base"
               type="text"
@@ -93,7 +98,69 @@ function AddResume() {
               onChange={(e) => setResumetitle(e.target.value.trimStart())}
             />
           </div>
+
+          {/* Template Selection */}
+          <div className="mt-6">
+            <label className="text-sm font-medium mb-3 block">Choose Template Design</label>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+              {resumeTemplates.map((template) => (
+                <div
+                  key={template.id}
+                  onClick={() => setSelectedTemplate(template)}
+                  className={`relative cursor-pointer rounded-xl border-2 p-4 transition-all duration-300 hover:shadow-lg ${
+                    selectedTemplate.id === template.id
+                      ? 'border-primary shadow-lg shadow-primary/20 bg-primary/5'
+                      : 'border-border hover:border-primary/50'
+                  }`}
+                >
+                  {/* Selected Indicator */}
+                  {selectedTemplate.id === template.id && (
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-primary rounded-full flex items-center justify-center shadow-lg">
+                      <Check className="w-4 h-4 text-white" />
+                    </div>
+                  )}
+
+                  {/* Template Preview */}
+                  <div className="mb-3">
+                    <div 
+                      className="w-full h-24 rounded-lg flex items-center justify-center text-3xl"
+                      style={{ backgroundColor: `${template.themeColor}15` }}
+                    >
+                      {template.icon}
+                    </div>
+                    <div 
+                      className="h-1 w-full rounded-full mt-2"
+                      style={{ backgroundColor: template.themeColor }}
+                    />
+                  </div>
+
+                  {/* Template Info */}
+                  <h4 className="font-semibold text-sm mb-1">{template.name}</h4>
+                  <p className="text-xs text-muted-foreground line-clamp-2">
+                    {template.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Selected Template Info */}
+          <div className="mt-4 p-4 rounded-lg bg-muted/50 border border-border">
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+                style={{ backgroundColor: `${selectedTemplate.themeColor}20` }}
+              >
+                {selectedTemplate.icon}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-medium">Selected: {selectedTemplate.name}</p>
+                <p className="text-xs text-muted-foreground">{selectedTemplate.description}</p>
+              </div>
+            </div>
+          </div>
           
+          {/* Action Buttons */}
           <div className="gap-3 flex justify-end mt-6">
             <Button 
               variant="outline" 

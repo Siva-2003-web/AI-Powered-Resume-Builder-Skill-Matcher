@@ -26,6 +26,7 @@ import { resumeStore } from "./store/store";
 import { Provider } from "react-redux";
 import SkillGapAnalysis from "./pages/dashboard/skill-gap/SkillGapAnalysis.jsx";
 import JobMatcher from "./pages/dashboard/job-matcher/JobMatcher.jsx";
+import DemoPage from "./pages/demo/DemoPage.jsx";
 
 /**
  * Application Route Configuration
@@ -67,6 +68,10 @@ const appRouter = createBrowserRouter([
     // Public routes
     path: "/",
     element: <HomePage />,
+  },
+  {
+    path: "/demo",
+    element: <DemoPage />,
   },
   {
     path: "/auth/sign-in",

@@ -1,5 +1,6 @@
 import React from "react";
-import { Eye, Edit, Trash2, Loader2, FileText } from "lucide-react";
+import PropTypes from "prop-types";
+import { Eye, Edit, Trash2, Loader2, FileText, Sparkles } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +16,7 @@ import { deleteThisResume } from "@/Services/resumeAPI";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
-function ResumeCard({ resume, refreshData }) {
+function ResumeCard({ resume, refreshData, isDemo = false }) {
   const [loading, setLoading] = React.useState(false);
   const [openAlert, setOpenAlert] = React.useState(false);
   const navigate = useNavigate();
@@ -24,6 +25,12 @@ function ResumeCard({ resume, refreshData }) {
   const themeColor = resume.themeColor || "#3F5E96";
 
   const handleDelete = async () => {
+    if (isDemo) {
+      toast.error("Demo resumes cannot be deleted");
+      setOpenAlert(false);
+      return;
+    }
+
     setLoading(true);
     console.log("Delete Resume with ID", resume._id);
     try {
@@ -61,9 +68,17 @@ function ResumeCard({ resume, refreshData }) {
             />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-bold text-lg line-clamp-2 group-hover:text-primary transition-colors">
-              {resume.title || "Untitled Resume"}
-            </h3>
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-bold text-lg line-clamp-1 group-hover:text-primary transition-colors">
+                {resume.title || "Untitled Resume"}
+              </h3>
+              {isDemo && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 border border-blue-300 dark:border-blue-800 shrink-0">
+                  <Sparkles className="h-3 w-3 text-blue-600 dark:text-blue-400" />
+                  <span className="text-xs font-bold text-blue-700 dark:text-blue-300">DEMO</span>
+                </span>
+              )}
+            </div>
             {resume.jobTitle && (
               <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
                 {resume.jobTitle}
@@ -106,8 +121,15 @@ function ResumeCard({ resume, refreshData }) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate(`/dashboard/edit-resume/${resume._id}`)}
-            className="flex-1 gap-2 hover:bg-blue-500/10 hover:text-blue-600"
+            onClick={() => {
+              if (isDemo) {
+                toast.error("Demo resumes are read-only examples. Please create your own resume to edit.");
+              } else {
+                navigate(`/dashboard/edit-resume/${resume._id}`);
+              }
+            }}
+            disabled={isDemo}
+            className={`flex-1 gap-2 ${isDemo ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-500/10 hover:text-blue-600'}`}
           >
             <Edit className="h-4 w-4" />
             <span className="hidden sm:inline">Edit</span>
@@ -115,8 +137,15 @@ function ResumeCard({ resume, refreshData }) {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => setOpenAlert(true)}
-            className="flex-1 gap-2 hover:bg-destructive/10 hover:text-destructive"
+            onClick={() => {
+              if (isDemo) {
+                toast.error("Demo resumes cannot be deleted. They are provided as examples only.");
+              } else {
+                setOpenAlert(true);
+              }
+            }}
+            disabled={isDemo}
+            className={`flex-1 gap-2 ${isDemo ? 'opacity-50 cursor-not-allowed' : 'hover:bg-destructive/10 hover:text-destructive'}`}
           >
             <Trash2 className="h-4 w-4" />
             <span className="hidden sm:inline">Delete</span>
@@ -131,7 +160,7 @@ function ResumeCard({ resume, refreshData }) {
             <AlertDialogTitle>Delete Resume?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete your
-              resume "{resume.title}" and all associated data.
+              resume &quot;{resume.title}&quot; and all associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -155,6 +184,19 @@ function ResumeCard({ resume, refreshData }) {
     </div>
   );
 }
+
+ResumeCard.propTypes = {
+  resume: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    themeColor: PropTypes.string,
+    jobTitle: PropTypes.string,
+    firstName: PropTypes.string,
+    lastName: PropTypes.string,
+  }).isRequired,
+  refreshData: PropTypes.func.isRequired,
+  isDemo: PropTypes.bool,
+};
 
 export default ResumeCard;
 
