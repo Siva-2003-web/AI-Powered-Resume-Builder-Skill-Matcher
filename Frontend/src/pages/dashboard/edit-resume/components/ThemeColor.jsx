@@ -18,6 +18,7 @@ import { updateThisResume } from "@/Services/resumeAPI";
 function ThemeColor({ resumeInfo }) {
   const dispatch = useDispatch();
   const colors = [
+    "#000000", // Black - added as requested
     "#FF5733",
     "#33FF57",
     "#3357FF",
@@ -48,7 +49,7 @@ function ThemeColor({ resumeInfo }) {
       addResumeData({
         ...resumeInfo,
         themeColor: color,
-      })
+      }),
     );
     const data = {
       data: {

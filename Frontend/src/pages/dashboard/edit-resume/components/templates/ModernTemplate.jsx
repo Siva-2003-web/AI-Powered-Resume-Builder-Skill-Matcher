@@ -13,11 +13,19 @@ function ModernTemplate({ resumeData }) {
       >
         {/* Profile Section */}
         <div className="text-center mb-6">
-          <div className="w-20 h-20 bg-white/20 rounded-full mx-auto mb-3 flex items-center justify-center">
-            <span className="text-2xl font-bold">
-              {resumeData?.firstName?.[0]}{resumeData?.lastName?.[0]}
-            </span>
-          </div>
+          {resumeData?.profilePicture ? (
+            <img
+              src={resumeData.profilePicture}
+              alt="Profile"
+              className="w-20 h-20 rounded-full mx-auto mb-3 object-cover border-2 border-white/50"
+            />
+          ) : (
+            <div className="w-20 h-20 bg-white/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+              <span className="text-2xl font-bold">
+                {resumeData?.firstName?.[0]}{resumeData?.lastName?.[0]}
+              </span>
+            </div>
+          )}
           <h1 className="font-bold text-lg">
             {resumeData?.firstName} {resumeData?.lastName}
           </h1>
@@ -46,6 +54,24 @@ function ModernTemplate({ resumeData }) {
               <div className="flex items-center gap-2">
                 <span>📍</span>
                 <span>{resumeData.address}</span>
+              </div>
+            )}
+            {resumeData?.githubUrl && (
+              <div className="flex items-center gap-2">
+                <span>💻</span>
+                <a href={resumeData.githubUrl} className="hover:underline break-all">GitHub</a>
+              </div>
+            )}
+            {resumeData?.linkedinUrl && (
+              <div className="flex items-center gap-2">
+                <span>💼</span>
+                <a href={resumeData.linkedinUrl} className="hover:underline break-all">LinkedIn</a>
+              </div>
+            )}
+            {resumeData?.websiteUrl && (
+              <div className="flex items-center gap-2">
+                <span>🌐</span>
+                <a href={resumeData.websiteUrl} className="hover:underline break-all">Website</a>
               </div>
             )}
           </div>
@@ -90,6 +116,11 @@ function ModernTemplate({ resumeData }) {
                   <p className="opacity-60 text-[10px]">
                     {edu.startDate} - {edu.endDate}
                   </p>
+                  {edu.grade && (
+                    <p className="opacity-80 text-[10px]">
+                      {edu.gradeType || 'CGPA'}: {edu.grade}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -153,7 +184,7 @@ function ModernTemplate({ resumeData }) {
 
         {/* Projects */}
         {resumeData?.projects && resumeData.projects.length > 0 && (
-          <div>
+          <div className="mb-6">
             <h2
               className="font-bold text-sm mb-2 border-b-2 pb-1"
               style={{ color: themeColor, borderColor: themeColor }}
@@ -178,9 +209,38 @@ function ModernTemplate({ resumeData }) {
             </div>
           </div>
         )}
+
+        {/* Certifications */}
+        {resumeData?.certifications && resumeData.certifications.length > 0 && (
+          <div>
+            <h2
+              className="font-bold text-sm mb-2 border-b-2 pb-1"
+              style={{ color: themeColor, borderColor: themeColor }}
+            >
+              Certifications
+            </h2>
+            <div className="space-y-3">
+              {resumeData.certifications.map((cert, index) => (
+                <div key={index}>
+                  <h3 className="text-xs font-bold text-black">{cert.certificationName}</h3>
+                  <p className="text-xs text-gray-600">{cert.issuingOrganization}</p>
+                  <p className="text-xs text-gray-500">
+                    {cert.issueDate}{cert.expirationDate ? ` - ${cert.expirationDate}` : ' - No Expiration'}
+                  </p>
+                  {cert.credentialUrl && (
+                    <a href={cert.credentialUrl} className="text-xs hover:underline" style={{ color: themeColor }}>
+                      View Credential
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 export default ModernTemplate;
+

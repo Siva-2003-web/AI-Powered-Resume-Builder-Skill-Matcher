@@ -8,23 +8,56 @@ function MinimalTemplate({ resumeData }) {
     <div className="shadow-lg h-full p-12 bg-white">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-extralight tracking-wide" style={{ color: themeColor }}>
-          {resumeData?.firstName?.toUpperCase()} {resumeData?.lastName?.toUpperCase()}
-        </h1>
-        <p className="text-sm text-gray-500 mt-1 tracking-widest uppercase">
-          {resumeData?.jobTitle}
-        </p>
-        <div className="flex gap-6 mt-3 text-xs text-gray-400">
-          {resumeData?.email && <span>{resumeData.email}</span>}
-          {resumeData?.phone && <span>{resumeData.phone}</span>}
-          {resumeData?.address && <span>{resumeData.address}</span>}
+        <div className="flex items-start gap-6">
+          {/* Profile Picture */}
+          {resumeData?.profilePicture && (
+            <img
+              src={resumeData.profilePicture}
+              alt="Profile"
+              className="w-20 h-20 rounded-full object-cover"
+              style={{ border: `2px solid ${themeColor}` }}
+            />
+          )}
+          <div className="flex-1">
+            <h1 className="text-3xl font-extralight tracking-wide" style={{ color: themeColor }}>
+              {resumeData?.firstName?.toUpperCase()} {resumeData?.lastName?.toUpperCase()}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1 tracking-widest uppercase">
+              {resumeData?.jobTitle}
+            </p>
+            <div className="flex gap-6 mt-3 text-xs text-gray-400">
+              {resumeData?.email && <span>{resumeData.email}</span>}
+              {resumeData?.phone && <span>{resumeData.phone}</span>}
+              {resumeData?.address && <span>{resumeData.address}</span>}
+            </div>
+            {/* Social Links */}
+            {(resumeData?.githubUrl || resumeData?.linkedinUrl || resumeData?.websiteUrl) && (
+              <div className="flex gap-6 mt-2 text-xs">
+                {resumeData?.githubUrl && (
+                  <a href={resumeData.githubUrl} className="hover:underline" style={{ color: themeColor }}>
+                    GitHub
+                  </a>
+                )}
+                {resumeData?.linkedinUrl && (
+                  <a href={resumeData.linkedinUrl} className="hover:underline" style={{ color: themeColor }}>
+                    LinkedIn
+                  </a>
+                )}
+                {resumeData?.websiteUrl && (
+                  <a href={resumeData.websiteUrl} className="hover:underline" style={{ color: themeColor }}>
+                    Website
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Summary */}
       {resumeData?.summary && (
         <div className="mb-8">
-          <p className="text-xs leading-relaxed text-gray-600 max-w-2xl">
+          <p className="text-xs leading-relaxed text-black max-w-2xl">
             {resumeData.summary}
           </p>
         </div>
@@ -102,12 +135,17 @@ function MinimalTemplate({ resumeData }) {
             <div className="space-y-3">
               {resumeData.education.map((edu, index) => (
                 <div key={index}>
-                  <p className="text-xs font-semibold">{edu.degree}</p>
+                  <p className="text-xs font-semibold text-black">{edu.degree}</p>
                   <p className="text-xs text-gray-500">{edu.major}</p>
                   <p className="text-[10px] text-gray-400">{edu.universityName}</p>
                   <p className="text-[10px] text-gray-400">
                     {edu.startDate} — {edu.endDate}
                   </p>
+                  {edu.grade && (
+                    <p className="text-[10px] text-gray-500">
+                      {edu.gradeType || 'CGPA'}: {edu.grade}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -137,8 +175,37 @@ function MinimalTemplate({ resumeData }) {
           </div>
         )}
       </div>
+
+      {/* Certifications */}
+      {resumeData?.certifications && resumeData.certifications.length > 0 && (
+        <div className="mb-8">
+          <h2
+            className="text-xs font-bold tracking-widest uppercase mb-4 pb-2 border-b"
+            style={{ color: themeColor, borderColor: themeColor }}
+          >
+            Certifications
+          </h2>
+          <div className="space-y-4">
+            {resumeData.certifications.map((cert, index) => (
+              <div key={index}>
+                <h3 className="text-xs font-semibold text-black">{cert.certificationName}</h3>
+                <p className="text-xs text-gray-500">{cert.issuingOrganization}</p>
+                <p className="text-[10px] text-gray-400">
+                  {cert.issueDate}{cert.expirationDate ? ` — ${cert.expirationDate}` : ''}
+                </p>
+                {cert.credentialUrl && (
+                  <a href={cert.credentialUrl} className="text-[10px] hover:underline" style={{ color: themeColor }}>
+                    Verify
+                  </a>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
 export default MinimalTemplate;
+

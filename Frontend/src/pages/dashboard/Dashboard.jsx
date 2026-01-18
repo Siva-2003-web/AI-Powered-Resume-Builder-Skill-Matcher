@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { getAllResumeData, getDemoResumes } from "@/Services/resumeAPI";
 import AddResume from "./components/AddResume";
+import UploadResume from "./components/UploadResume";
 import ResumeCard from "./components/ResumeCard";
 import { useNavigate } from "react-router-dom";
 import { Target, Briefcase, Sparkles, ArrowRight } from "lucide-react";
@@ -151,6 +152,7 @@ function Dashboard() {
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             <AddResume />
+            <UploadResume />
             {resumeList.length > 0 &&
               resumeList.map((resume, index) => (
                 <div

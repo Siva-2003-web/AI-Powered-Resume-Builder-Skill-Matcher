@@ -7,6 +7,7 @@ import Experience from "./form-components/Experience";
 import Education from "./form-components/Education";
 import Skills from "./form-components/Skills";
 import Project from "./form-components/Project";
+import Certification from "./form-components/Certification";
 import TemplateSelector from "./TemplateSelector";
 import { ArrowLeft, ArrowRight, HomeIcon } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -18,7 +19,7 @@ function ResumeForm() {
   const [enanbledPrev, setEnabledPrev] = useState(true);
   const resumeInfo = useSelector((state) => state.editResume.resumeData);
 
-  const totalSteps = 7; // 0-6 (Personal, Summary, Experience, Project, Education, Skills, Template)
+  const totalSteps = 8; // 0-7 (Personal, Summary, Experience, Project, Education, Skills, Certification, Template)
 
   useEffect(() => {
     if (currentIndex === 0) {
@@ -121,6 +122,13 @@ function ResumeForm() {
         />
       )}
       {currentIndex === 6 && (
+        <Certification
+          resumeInfo={resumeInfo}
+          enanbledNext={setEnabledNext}
+          enanbledPrev={setEnabledPrev}
+        />
+      )}
+      {currentIndex === 7 && (
         <TemplateSelector />
       )}
     </div>

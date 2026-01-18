@@ -1,5 +1,3 @@
-import React from "react";
-
 // Creative Template - Colorful, modern, with visual flair
 function CreativeTemplate({ resumeData }) {
   const themeColor = resumeData?.themeColor || "#EC4899";
@@ -8,16 +6,42 @@ function CreativeTemplate({ resumeData }) {
     <div className="shadow-lg h-full bg-white">
       {/* Colorful Header Section */}
       <div className="p-10 text-white" style={{ backgroundColor: themeColor }}>
-        <h1 className="font-bold text-3xl">
-          {resumeData?.firstName} {resumeData?.lastName}
-        </h1>
-        <p className="text-lg font-medium mt-2 opacity-90">{resumeData?.jobTitle}</p>
-        <div className="flex gap-4 mt-3 text-sm opacity-80">
-          <span>{resumeData?.phone}</span>
-          <span>•</span>
-          <span>{resumeData?.email}</span>
-          <span>•</span>
-          <span>{resumeData?.address}</span>
+        <div className="flex items-center gap-6">
+          {/* Profile Picture */}
+          {resumeData?.profilePicture && (
+            <img
+              src={resumeData.profilePicture}
+              alt="Profile"
+              className="w-24 h-24 rounded-full object-cover border-4 border-white/50"
+            />
+          )}
+          <div className="flex-1">
+            <h1 className="font-bold text-3xl">
+              {resumeData?.firstName} {resumeData?.lastName}
+            </h1>
+            <p className="text-lg font-medium mt-2 opacity-90">{resumeData?.jobTitle}</p>
+            <div className="flex gap-4 mt-3 text-sm opacity-80">
+              <span>{resumeData?.phone}</span>
+              <span>•</span>
+              <span>{resumeData?.email}</span>
+              <span>•</span>
+              <span>{resumeData?.address}</span>
+            </div>
+            {/* Social Links */}
+            {(resumeData?.githubUrl || resumeData?.linkedinUrl || resumeData?.websiteUrl) && (
+              <div className="flex gap-4 mt-2 text-sm opacity-90">
+                {resumeData?.githubUrl && (
+                  <a href={resumeData.githubUrl} className="hover:underline">GitHub</a>
+                )}
+                {resumeData?.linkedinUrl && (
+                  <a href={resumeData.linkedinUrl} className="hover:underline">LinkedIn</a>
+                )}
+                {resumeData?.websiteUrl && (
+                  <a href={resumeData.websiteUrl} className="hover:underline">Website</a>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -31,7 +55,7 @@ function CreativeTemplate({ resumeData }) {
                 About Me
               </h2>
             </div>
-            <p className="text-xs leading-relaxed text-gray-700 ml-5">{resumeData.summary}</p>
+            <p className="text-xs leading-relaxed text-black ml-5">{resumeData.summary}</p>
           </div>
         )}
 
@@ -108,8 +132,13 @@ function CreativeTemplate({ resumeData }) {
               <div key={index} className="mt-3 ml-5">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="text-sm font-bold text-gray-800">{edu.degree} in {edu.major}</h3>
+                    <h3 className="text-sm font-bold text-black">{edu.degree} in {edu.major}</h3>
                     <p className="text-xs text-gray-600">{edu.universityName}</p>
+                    {edu.grade && (
+                      <p className="text-xs" style={{ color: themeColor }}>
+                        {edu.gradeType || 'CGPA'}: {edu.grade}
+                      </p>
+                    )}
                   </div>
                   <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
                     {edu.startDate} - {edu.endDate}
@@ -122,7 +151,7 @@ function CreativeTemplate({ resumeData }) {
 
         {/* Skills */}
         {resumeData?.skills && resumeData.skills.length > 0 && (
-          <div className="mb-4">
+          <div className="mb-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-2 h-8 rounded" style={{ backgroundColor: themeColor }}></div>
               <h2 className="font-bold text-lg" style={{ color: themeColor }}>
@@ -142,9 +171,43 @@ function CreativeTemplate({ resumeData }) {
             </div>
           </div>
         )}
+
+        {/* Certifications */}
+        {resumeData?.certifications && resumeData.certifications.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-2 h-8 rounded" style={{ backgroundColor: themeColor }}></div>
+              <h2 className="font-bold text-lg" style={{ color: themeColor }}>
+                Certifications
+              </h2>
+            </div>
+            {resumeData.certifications.map((cert, index) => (
+              <div key={index} className="mt-3 ml-5 p-3 rounded-lg" style={{ backgroundColor: `${themeColor}10` }}>
+                <h3 className="text-sm font-bold text-black">{cert.certificationName}</h3>
+                <p className="text-xs font-semibold" style={{ color: themeColor }}>{cert.issuingOrganization}</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  {cert.issueDate}{cert.expirationDate ? ` - ${cert.expirationDate}` : ''}
+                </p>
+                {cert.credentialUrl && (
+                  <a 
+                    href={cert.credentialUrl} 
+                    className="inline-block mt-2 text-xs font-medium px-2 py-1 rounded text-white hover:opacity-90"
+                    style={{ backgroundColor: themeColor }}
+                  >
+                    View Credential
+                  </a>
+                )}
+                {cert.description && (
+                  <p className="text-xs text-black mt-2">{cert.description}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 export default CreativeTemplate;
+

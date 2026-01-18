@@ -9,6 +9,10 @@ const resumeSchema = new mongoose.Schema({
   jobTitle: { type: String, default: "" },
   phone: { type: String, default: "" },
   address: { type: String, default: "" },
+  profilePicture: { type: String, default: "" }, // Base64 encoded image
+  githubUrl: { type: String, default: "" },
+  linkedinUrl: { type: String, default: "" },
+  websiteUrl: { type: String, default: "" },
   user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   experience: [
     {
@@ -38,6 +42,17 @@ const resumeSchema = new mongoose.Schema({
       projectName: { type: String },
       techStack: { type: String },
       projectSummary: { type: String },
+    },
+  ],
+  certifications: [
+    {
+      certificationName: { type: String },
+      issuingOrganization: { type: String },
+      issueDate: { type: String },
+      expirationDate: { type: String },
+      credentialId: { type: String },
+      credentialUrl: { type: String },
+      description: { type: String },
     },
   ],
   themeColor: { type: String, required: true },

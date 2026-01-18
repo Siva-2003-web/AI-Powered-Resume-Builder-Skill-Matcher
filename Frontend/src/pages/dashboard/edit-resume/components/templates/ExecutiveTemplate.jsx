@@ -8,19 +8,52 @@ function ExecutiveTemplate({ resumeData }) {
     <div className="shadow-lg h-full p-14 bg-white">
       {/* Header - Bold Executive Style */}
       <div className="mb-6 pb-4 border-b-4" style={{ borderColor: themeColor }}>
-        <h1
-          className="font-bold text-3xl uppercase tracking-wide"
-          style={{ color: themeColor }}
-        >
-          {resumeData?.firstName} {resumeData?.lastName}
-        </h1>
-        <p className="text-base font-semibold mt-2 uppercase tracking-wider" style={{ color: themeColor }}>
-          {resumeData?.jobTitle}
-        </p>
-        <div className="flex gap-6 mt-3 text-xs text-gray-600">
-          <span>{resumeData?.phone}</span>
-          <span>{resumeData?.email}</span>
-          <span>{resumeData?.address}</span>
+        <div className="flex items-start gap-6">
+          {/* Profile Picture */}
+          {resumeData?.profilePicture && (
+            <img
+              src={resumeData.profilePicture}
+              alt="Profile"
+              className="w-24 h-24 rounded object-cover"
+              style={{ border: `3px solid ${themeColor}` }}
+            />
+          )}
+          <div className="flex-1">
+            <h1
+              className="font-bold text-3xl uppercase tracking-wide"
+              style={{ color: themeColor }}
+            >
+              {resumeData?.firstName} {resumeData?.lastName}
+            </h1>
+            <p className="text-base font-semibold mt-2 uppercase tracking-wider" style={{ color: themeColor }}>
+              {resumeData?.jobTitle}
+            </p>
+            <div className="flex gap-6 mt-3 text-xs text-black">
+              <span>{resumeData?.phone}</span>
+              <span>{resumeData?.email}</span>
+              <span>{resumeData?.address}</span>
+            </div>
+            {/* Social Links */}
+            {(resumeData?.githubUrl || resumeData?.linkedinUrl || resumeData?.websiteUrl) && (
+              <div className="flex gap-4 mt-2 text-xs">
+                {resumeData?.githubUrl && (
+                  <a href={resumeData.githubUrl} className="hover:underline font-medium" style={{ color: themeColor }}>
+                    GitHub
+                  </a>
+                )}
+                {resumeData?.linkedinUrl && (
+                  <a href={resumeData.linkedinUrl} className="hover:underline font-medium" style={{ color: themeColor }}>
+                    LinkedIn
+                  </a>
+                )}
+                {resumeData?.websiteUrl && (
+                  <a href={resumeData.websiteUrl} className="hover:underline font-medium" style={{ color: themeColor }}>
+                    Website
+                  </a>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -33,7 +66,7 @@ function ExecutiveTemplate({ resumeData }) {
           >
             Executive Summary
           </h2>
-          <p className="text-xs leading-relaxed text-gray-700">{resumeData.summary}</p>
+          <p className="text-xs leading-relaxed text-black">{resumeData.summary}</p>
         </div>
       )}
 
@@ -80,8 +113,13 @@ function ExecutiveTemplate({ resumeData }) {
             <div key={index} className="mt-3">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="text-sm font-bold">{edu.degree} in {edu.major}</h3>
+                  <h3 className="text-sm font-bold text-black">{edu.degree} in {edu.major}</h3>
                   <p className="text-xs text-gray-600">{edu.universityName}</p>
+                  {edu.grade && (
+                    <p className="text-xs text-gray-500">
+                      {edu.gradeType || 'CGPA'}: {edu.grade}
+                    </p>
+                  )}
                 </div>
                 <span className="text-xs text-gray-500">
                   {edu.startDate} - {edu.endDate}
@@ -113,7 +151,7 @@ function ExecutiveTemplate({ resumeData }) {
 
       {/* Projects */}
       {resumeData?.projects && resumeData.projects.length > 0 && (
-        <div className="mb-4">
+        <div className="mb-6">
           <h2 
             className="font-bold text-base mb-3 uppercase tracking-wide pb-1 border-b-2" 
             style={{ color: themeColor, borderColor: themeColor }}
@@ -134,8 +172,45 @@ function ExecutiveTemplate({ resumeData }) {
           ))}
         </div>
       )}
+
+      {/* Certifications */}
+      {resumeData?.certifications && resumeData.certifications.length > 0 && (
+        <div className="mb-4">
+          <h2 
+            className="font-bold text-base mb-3 uppercase tracking-wide pb-1 border-b-2" 
+            style={{ color: themeColor, borderColor: themeColor }}
+          >
+            Certifications & Credentials
+          </h2>
+          {resumeData.certifications.map((cert, index) => (
+            <div key={index} className="mt-3">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="text-sm font-bold text-black">{cert.certificationName}</h3>
+                  <p className="text-xs font-semibold text-gray-700">{cert.issuingOrganization}</p>
+                </div>
+                <span className="text-xs text-gray-500 font-medium">
+                  {cert.issueDate}{cert.expirationDate ? ` - ${cert.expirationDate}` : ''}
+                </span>
+              </div>
+              {cert.credentialId && (
+                <p className="text-xs text-gray-500">ID: {cert.credentialId}</p>
+              )}
+              {cert.credentialUrl && (
+                <a href={cert.credentialUrl} className="text-xs font-medium hover:underline" style={{ color: themeColor }}>
+                  Verify Credential →
+                </a>
+              )}
+              {cert.description && (
+                <p className="text-xs text-black mt-1">{cert.description}</p>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
 
 export default ExecutiveTemplate;
+

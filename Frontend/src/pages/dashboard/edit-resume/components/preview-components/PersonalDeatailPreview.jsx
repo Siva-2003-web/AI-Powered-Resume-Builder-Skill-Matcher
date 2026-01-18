@@ -3,6 +3,17 @@ import React from "react";
 function PersonalDeatailPreview({ resumeInfo }) {
   return (
     <div>
+      {/* Profile Picture */}
+      {resumeInfo?.profilePicture && (
+        <div className="flex justify-center mb-3">
+          <img
+            src={resumeInfo.profilePicture}
+            alt="Profile"
+            className="w-20 h-20 rounded-full object-cover border-2"
+            style={{ borderColor: resumeInfo?.themeColor }}
+          />
+        </div>
+      )}
       <h2
         className="font-bold text-xl text-center"
         style={{
@@ -11,7 +22,7 @@ function PersonalDeatailPreview({ resumeInfo }) {
       >
         {resumeInfo?.firstName} {resumeInfo?.lastName}
       </h2>
-      <h2 className="text-center text-sm font-medium">
+      <h2 className="text-center text-sm font-medium text-black">
         {resumeInfo?.jobTitle}
       </h2>
       <h2
@@ -41,6 +52,40 @@ function PersonalDeatailPreview({ resumeInfo }) {
           {resumeInfo?.email}
         </h2>
       </div>
+      
+      {/* Social Links */}
+      {(resumeInfo?.githubUrl || resumeInfo?.linkedinUrl || resumeInfo?.websiteUrl) && (
+        <div className="flex justify-center gap-3 mt-1">
+          {resumeInfo?.githubUrl && (
+            <a
+              href={resumeInfo.githubUrl}
+              className="text-xs hover:underline"
+              style={{ color: resumeInfo?.themeColor }}
+            >
+              GitHub
+            </a>
+          )}
+          {resumeInfo?.linkedinUrl && (
+            <a
+              href={resumeInfo.linkedinUrl}
+              className="text-xs hover:underline"
+              style={{ color: resumeInfo?.themeColor }}
+            >
+              LinkedIn
+            </a>
+          )}
+          {resumeInfo?.websiteUrl && (
+            <a
+              href={resumeInfo.websiteUrl}
+              className="text-xs hover:underline"
+              style={{ color: resumeInfo?.themeColor }}
+            >
+              Website
+            </a>
+          )}
+        </div>
+      )}
+      
       <hr
         className="border-[1.5px] my-2"
         style={{
@@ -52,3 +97,4 @@ function PersonalDeatailPreview({ resumeInfo }) {
 }
 
 export default PersonalDeatailPreview;
+
